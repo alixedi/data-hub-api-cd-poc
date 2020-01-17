@@ -13,11 +13,15 @@ from datahub.investment.project.test.factories import (
     ActiveInvestmentProjectFactory,
     AssignPMInvestmentProjectFactory,
     FDIInvestmentProjectFactory,
-    InvestmentProjectFactory,
     InvestmentProjectTeamMemberFactory,
-    VerifyWinInvestmentProjectFactory,
     WonInvestmentProjectFactory,
 )
+from datahub.investment.project.test.factories import (
+    InvestmentProjectFactory,
+    VerifyWinInvestmentProjectFactory,
+)
+
+pytestmark = pytest.mark.django_db
 
 
 def get_expected_data_from_project(project):
@@ -187,3 +191,15 @@ class TestInvestmentProjectsDatasetViewSet(BaseDatasetViewTest):
                                        key=lambda item: item.pk) + [project_1, project_2]
         for index, project in enumerate(expected_project_list):
             assert str(project.id) == response_results[index]['id']
+
+
+class TestInvestmentProjectsActivityDatasetViewSet(BaseDatasetViewTest):
+    """
+    Tests for InvestmentProjectsActivityDatasetView
+
+    It only tests if results are being returned. The results are validated in separate tests
+    in the investment project app.
+    """
+
+    view_url = reverse('api-v4:dataset:investment-projects-activity-dataset')
+    factory = InvestmentProjectFactory

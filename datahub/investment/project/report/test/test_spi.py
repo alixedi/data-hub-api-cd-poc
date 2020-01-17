@@ -7,7 +7,7 @@ from datahub.core.constants import InvestmentProjectStage
 from datahub.core.constants import Service
 from datahub.interaction.test.factories import InvestmentProjectInteractionFactory
 from datahub.investment.project.constants import InvestorType
-from datahub.investment.project.proposition.models import PropositionDocument
+from datahub.investment.project.proposition.models import PropositionDocument, PropositionStatus
 from datahub.investment.project.proposition.test.factories import PropositionFactory
 from datahub.investment.project.report.spi import SPIReport
 from datahub.investment.project.test.factories import (
@@ -120,7 +120,7 @@ def test_interaction_would_end_spi1_or_not(spi_report, service_id, visible):
     assert rows[0]['Project created on'] == investment_project.created_on.isoformat()
     if visible:
         assert rows[0]['Enquiry processed'] == interaction.created_on.isoformat()
-        assert rows[0]['Enquiry processed by'] == interaction.created_by.name
+        assert str(rows[0]['Enquiry processed by']) == interaction.created_by.name
         assert rows[0]['Enquiry type'] == interaction.service.name
     else:
         assert 'Enquiry processed' not in rows[0]
@@ -226,7 +226,7 @@ def test_earliest_interactions_are_being_selected(spi_report, ist_adviser):
     assert rows[0]['Aftercare offered on'] == '2017-03-04T00:00:00+00:00'
 
 
-def test_can_get_propositions(spi_report, propositions):
+def test_can_get_propositions_with_default_formatting(spi_report, propositions):
     """Check if we can see propositions in the report."""
     rows = list(spi_report.rows())
 
@@ -238,6 +238,46 @@ def test_can_get_propositions(spi_report, propositions):
         '2017-01-05;abandoned;2017-01-04T11:11:11+00:00;John Doe',
     )
     assert rows[0]['Propositions'] == ';'.join(expected)
+
+
+def test_can_get_propositions_with_custom_formatting(propositions):
+    """Check if we can see custom formatted propositions in the report."""
+
+    def proposition_formatter(propositions):
+        return [{
+            'deadline': proposition.deadline.isoformat(),
+            'status': proposition.status,
+            'modified_on': proposition.modified_on.isoformat()
+            if proposition.status != PropositionStatus.ongoing else '',
+            'adviser_id': str(proposition.adviser.id),
+        } for proposition in propositions]
+
+    spi_report = SPIReport(proposition_formatter=proposition_formatter)
+    rows = list(spi_report.rows())
+
+    assert len(rows) == 1
+
+    expected = [
+        {
+            'deadline': '2017-01-05',
+            'status': 'ongoing',
+            'modified_on': '',
+            'adviser_id': str(propositions[0].adviser.id),
+        },
+        {
+            'deadline': '2017-01-05',
+            'status': 'completed',
+            'modified_on': '2017-01-04T11:11:11+00:00',
+            'adviser_id': str(propositions[1].adviser.id),
+        },
+        {
+            'deadline': '2017-01-05',
+            'status': 'abandoned',
+            'modified_on': '2017-01-04T11:11:11+00:00',
+            'adviser_id': str(propositions[0].adviser.id),
+        },
+    ]
+    assert rows[0]['Propositions'] == expected
 
 
 def test_can_get_spi5_start_and_end(spi_report, ist_adviser):

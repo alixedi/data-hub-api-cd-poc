@@ -41,10 +41,13 @@ class SPIReport:
     SPI1_END = 'Enquiry processed'
     SPI1_END_INTERACTION_TYPE = 'Enquiry type'
     SPI1_END_BY = 'Enquiry processed by'
+
     SPI2_START = 'Assigned to IST'
     SPI2_END = 'Project manager assigned'
     SPI2_END_BY = 'Project manager assigned by'
+
     SPI3 = 'Propositions'
+
     SPI5_START = 'Project moved to won'
     SPI5_END = 'Aftercare offered on'
 
@@ -94,6 +97,10 @@ class SPIReport:
         (SPI5_END_SERVICE_IDS, SPI5_END),
     )
 
+    def __init__(self, proposition_formatter=None):
+        """Initialise the SPI Report."""
+        self.proposition_formatter = proposition_formatter
+
     def _get_spi_interactions(self, investment_project):
         """
         Gets SPI interactions for given Investment Project.
@@ -121,7 +128,7 @@ class SPIReport:
                     and field_name not in data
                 ):
                     data[field_name] = {
-                        'created_by': interaction.created_by.name,
+                        'created_by': interaction.created_by,
                         'service_name': interaction.service.name,
                         'created_on': format_date(interaction.created_on),
                     }
@@ -227,9 +234,13 @@ class SPIReport:
         data = {}
 
         propositions = self._get_propositions(investment_project, ist_only=True)
-        if propositions:
-            data[self.SPI3] = self._format_propositions(propositions)
+        if not propositions:
+            return data
 
+        formatter = self.proposition_formatter \
+            if self.proposition_formatter else self._format_propositions
+
+        data[self.SPI3] = formatter(propositions)
         return data
 
     def get_spi5(self, investment_project, spi_interactions):
