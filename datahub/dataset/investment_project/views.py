@@ -6,8 +6,9 @@ from datahub.core.query_utils import (
     get_empty_string_if_null_expression,
 )
 from datahub.dataset.core.views import BaseDatasetView
-from datahub.dataset.investment_project.pagination import \
-    InvestmentProjectActivityDatasetViewCursorPagination
+from datahub.dataset.investment_project.pagination import (
+    InvestmentProjectActivityDatasetViewCursorPagination,
+)
 from datahub.investment.project.models import InvestmentProject
 from datahub.investment.project.query_utils import get_project_code_expression
 from datahub.metadata.query_utils import get_sector_name_subquery
