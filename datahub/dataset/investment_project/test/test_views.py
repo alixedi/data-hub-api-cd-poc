@@ -16,12 +16,10 @@ from datahub.investment.project.test.factories import (
     ActiveInvestmentProjectFactory,
     AssignPMInvestmentProjectFactory,
     FDIInvestmentProjectFactory,
-    InvestmentProjectTeamMemberFactory,
-    WonInvestmentProjectFactory,
-)
-from datahub.investment.project.test.factories import (
     InvestmentProjectFactory,
+    InvestmentProjectTeamMemberFactory,
     VerifyWinInvestmentProjectFactory,
+    WonInvestmentProjectFactory,
 )
 from datahub.metadata.models import Team
 
