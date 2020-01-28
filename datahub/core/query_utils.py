@@ -148,9 +148,6 @@ def get_aggregate_subquery(model, expression, join_field_name='pk', filter=None)
     if not getattr(expression, 'contains_aggregate', False):
         raise ValueError('An aggregate expression must be provided.')
 
-    # if filter is None:
-    #    filter = {}
-
     # For an explanation of the operations here, see
     # https://docs.djangoproject.com/en/2.2/ref/models/expressions/#using-aggregates-within-a-subquery-expression
     queryset = model.objects.filter(
