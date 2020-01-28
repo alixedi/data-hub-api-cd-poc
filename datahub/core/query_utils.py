@@ -85,6 +85,7 @@ def get_array_agg_subquery(
     model,
     join_field_name,
     expression_to_aggregate,
+    filter=None,
     distinct=False,
     ordering=(),
 ):
@@ -125,11 +126,12 @@ def get_array_agg_subquery(
     return get_aggregate_subquery(
         model,
         ArrayAgg(expression_to_aggregate, distinct=distinct, ordering=ordering),
+        filter=filter,
         join_field_name=join_field_name,
     )
 
 
-def get_aggregate_subquery(model, expression, join_field_name='pk'):
+def get_aggregate_subquery(model, expression, join_field_name='pk', filter=None):
     """
     Gets a subquery that calculates an aggregate value of a to-many field.
 
@@ -146,6 +148,9 @@ def get_aggregate_subquery(model, expression, join_field_name='pk'):
     if not getattr(expression, 'contains_aggregate', False):
         raise ValueError('An aggregate expression must be provided.')
 
+    # if filter is None:
+    #    filter = {}
+
     # For an explanation of the operations here, see
     # https://docs.djangoproject.com/en/2.2/ref/models/expressions/#using-aggregates-within-a-subquery-expression
     queryset = model.objects.filter(
@@ -158,8 +163,7 @@ def get_aggregate_subquery(model, expression, join_field_name='pk'):
     ).values(
         '_annotated_value',
     )
-
-    return Subquery(queryset)
+    return Subquery(queryset, filter=filter)
 
 
 def get_top_related_expression_subquery(related_field, expression, ordering, outer_field='pk'):

@@ -293,5 +293,13 @@ class TestInvestmentProjectsActivityDatasetViewSet(BaseDatasetViewTest):
                     },
                 ],
                 'investment_project_id': str(propositions[0].investment_project.id),
+                'enquiry_processed': '',
+                'enquiry_type': '',
+                'enquiry_processed_by_id': '',
+                'assigned_to_ist': '',
+                'project_manager_assigned': '',
+                'project_manager_assigned_by_id': '',
+                'project_moved_to_won': '',
+                'aftercare_offered_on': '',
             },
         ]

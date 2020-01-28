@@ -16,10 +16,10 @@ def test_cursor_pagination_transforms_spi_record_row():
             'Project created on': 'project_created_on',
             'Enquiry processed': 'enquiry_processed',
             'Enquiry type': 'enquiry_type',
-            'Enquiry processed by': AdviserFactory(),
+            'Enquiry processed by': str(AdviserFactory().id),
             'Assigned to IST': 'assigned_to_ist',
             'Project manager assigned': 'project_manager_assigned',
-            'Project manager assigned by': AdviserFactory(),
+            'Project manager assigned by': str(AdviserFactory().id),
             'Propositions': [{
                 'deadline': 'deadline',
                 'status': 'status',
@@ -37,10 +37,10 @@ def test_cursor_pagination_transforms_spi_record_row():
     assert response == [{
         'enquiry_processed': 'enquiry_processed',
         'enquiry_type': 'enquiry_type',
-        'enquiry_processed_by_id': str(spi_report[0]['Enquiry processed by'].id),
+        'enquiry_processed_by_id': spi_report[0]['Enquiry processed by'],
         'assigned_to_ist': 'assigned_to_ist',
         'project_manager_assigned': 'project_manager_assigned',
-        'project_manager_assigned_by_id': str(spi_report[0]['Project manager assigned by'].id),
+        'project_manager_assigned_by_id': spi_report[0]['Project manager assigned by'],
         'propositions': [{
             'deadline': 'deadline',
             'status': 'status',

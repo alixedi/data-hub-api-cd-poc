@@ -1,4 +1,5 @@
 import pytest
+from dateutil.parser import parse as dateutil_parse
 from django.utils.timezone import now
 from freezegun import freeze_time
 
@@ -88,7 +89,7 @@ def test_can_see_spi1_start(spi_report):
 
     assert len(rows) == 1
     assert rows[0]['Project created on'] == investment_project.created_on.isoformat()
-    assert 'Enquiry processed' not in rows[0]
+    assert rows[0]['Enquiry processed'] == ''
 
 
 @pytest.mark.parametrize(
@@ -123,9 +124,9 @@ def test_interaction_would_end_spi1_or_not(spi_report, service_id, visible):
         assert str(rows[0]['Enquiry processed by']) == interaction.created_by.name
         assert rows[0]['Enquiry type'] == interaction.service.name
     else:
-        assert 'Enquiry processed' not in rows[0]
-        assert 'Enquiry processed by' not in rows[0]
-        assert 'Enquiry type' not in rows[0]
+        assert rows[0]['Enquiry processed'] == ''
+        assert rows[0]['Enquiry processed by'] == ''
+        assert rows[0]['Enquiry type'] == ''
 
 
 @pytest.mark.parametrize(
@@ -159,7 +160,7 @@ def test_interaction_would_start_spi2_or_not(spi_report, ist_adviser, service_id
     if visible:
         assert rows[0]['Assigned to IST'] == interaction.created_on.isoformat()
     else:
-        assert 'Assigned to IST' not in rows[0]
+        assert rows[0]['Assigned to IST'] == ''
 
 
 def test_assigning_ist_project_manager_ends_spi2(spi_report, ist_adviser):
@@ -190,8 +191,8 @@ def test_assigning_non_ist_project_manager_doesnt_end_spi2(spi_report):
     rows = list(spi_report.rows())
 
     assert len(rows) == 1
-    assert 'Project manager assigned' not in rows[0]
-    assert 'Project manager assigned by' not in rows[0]
+    assert rows[0]['Project manager assigned'] == ''
+    assert rows[0]['Project manager assigned by'] == ''
 
 
 def test_earliest_interactions_are_being_selected(spi_report, ist_adviser):
@@ -245,11 +246,11 @@ def test_can_get_propositions_with_custom_formatting(propositions):
 
     def proposition_formatter(propositions):
         return [{
-            'deadline': proposition.deadline.isoformat(),
-            'status': proposition.status,
-            'modified_on': proposition.modified_on.isoformat()
-            if proposition.status != PropositionStatus.ongoing else '',
-            'adviser_id': str(proposition.adviser.id),
+            'deadline': dateutil_parse(proposition['deadline']).strftime('%Y-%m-%d'),
+            'status': proposition['status'],
+            'modified_on': dateutil_parse(proposition['modified_on']).isoformat()
+            if proposition['status'] != PropositionStatus.ongoing else '',
+            'adviser_id': str(proposition['adviser_id']),
         } for proposition in propositions]
 
     spi_report = SPIReport(proposition_formatter=proposition_formatter)
@@ -324,5 +325,5 @@ def test_cannot_get_spi5_start_and_end_for_non_new_investor(
 
     rows = list(spi_report.rows())
     assert len(rows) == 1
-    assert 'Project moved to won' not in rows[0]
-    assert 'Aftercare offered on' not in rows[0]
+    assert rows[0]['Project moved to won'] == ''
+    assert rows[0]['Aftercare offered on'] == ''

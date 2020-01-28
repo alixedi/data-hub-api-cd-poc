@@ -4,6 +4,7 @@ be used for paginated responses.
 """
 from collections import OrderedDict
 
+from dateutil.parser import parse as dateutil_parse
 from rest_framework.response import Response
 
 from datahub.dataset.core.pagination import DatasetCursorPagination
@@ -30,7 +31,7 @@ class InvestmentProjectActivityDatasetViewCursorPagination(DatasetCursorPaginati
     }
 
     required_fields_value_mapping = {
-        'Enquiry processed by': lambda adviser: str(adviser.id),
+        'Enquiry processed by': lambda adviser: str(adviser),
         'Project manager assigned by': lambda adviser: str(adviser.id),
     }
 
@@ -42,19 +43,18 @@ class InvestmentProjectActivityDatasetViewCursorPagination(DatasetCursorPaginati
     def _proposition_formatter(self, propositions):
         """Returns a list of propositions with selected fields."""
         return [{
-            'deadline': proposition.deadline.isoformat(),
-            'status': proposition.status,
-            'modified_on': proposition.modified_on.isoformat()
-            if proposition.status != PropositionStatus.ongoing else '',
-            'adviser_id': str(proposition.adviser.id),
+            'deadline': dateutil_parse(proposition['deadline']).strftime('%Y-%m-%d'),
+            'status': proposition['status'],
+            'modified_on': dateutil_parse(proposition['modified_on']).isoformat()
+            if proposition['status'] != PropositionStatus.ongoing else '',
+            'adviser_id': proposition['adviser_id'],
         } for proposition in propositions]
 
     def _map_results(self, results):
         """Map results into desired format."""
         for result in results:
             yield {
-                self.required_fields_label_mapping[key]:
-                    self.required_fields_value_mapping.get(key, lambda value: value)(value)
+                self.required_fields_label_mapping[key]: value
                 for key, value in result.items()
                 if key in self.required_fields_label_mapping
             }

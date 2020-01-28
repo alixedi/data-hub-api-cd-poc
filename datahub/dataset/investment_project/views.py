@@ -2,8 +2,10 @@ from django.contrib.postgres.aggregates import ArrayAgg
 
 from datahub.core.query_utils import (
     get_aggregate_subquery,
-    get_array_agg_subquery,
     get_empty_string_if_null_expression,
+)
+from datahub.core.query_utils import (
+    get_array_agg_subquery,
 )
 from datahub.dataset.core.views import BaseDatasetView
 from datahub.dataset.investment_project.pagination import (
@@ -11,6 +13,7 @@ from datahub.dataset.investment_project.pagination import (
 )
 from datahub.investment.project.models import InvestmentProject
 from datahub.investment.project.query_utils import get_project_code_expression
+from datahub.investment.project.report.spi import get_spi_report_queryset
 from datahub.metadata.query_utils import get_sector_name_subquery
 
 
@@ -149,4 +152,4 @@ class InvestmentProjectsActivityDatasetView(BaseDatasetView):
 
     def get_dataset(self):
         """Get dataset."""
-        return InvestmentProject.objects
+        return get_spi_report_queryset()
