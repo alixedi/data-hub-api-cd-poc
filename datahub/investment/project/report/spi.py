@@ -12,7 +12,6 @@ SPI5_START  - when project has been moved to won
 SPI5_END    - earliest interaction when aftercare was offered, only for new investor,
               only for IST managed projects
 """
-from django.db.models import Prefetch
 from dateutil.parser import parse as dateutil_parse
 
 from datahub.core.constants import InvestmentProjectStage as Stage, Service
