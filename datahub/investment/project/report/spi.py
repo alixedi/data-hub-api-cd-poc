@@ -12,7 +12,7 @@ SPI5_START  - when project has been moved to won
 SPI5_END    - earliest interaction when aftercare was offered, only for new investor,
               only for IST managed projects
 """
-
+from django.db.models import Prefetch
 from dateutil.parser import parse as dateutil_parse
 
 from datahub.core.constants import InvestmentProjectStage as Stage, Service
@@ -223,13 +223,13 @@ class SPIReport:
         """Update data with SPI 3 propositions."""
         data = {}
 
-        if not investment_project.propositions:
+        if not investment_project.spi_propositions:
             return data
 
         formatter = self.proposition_formatter \
             if self.proposition_formatter else self._format_propositions
 
-        data[self.SPI3] = formatter(investment_project.propositions)
+        data[self.SPI3] = formatter(investment_project.spi_propositions)
         return data
 
     def get_spi5(self, investment_project, spi_interactions):
@@ -279,9 +279,9 @@ def get_spi_report_queryset():
 
     return InvestmentProject.objects.select_related(
         'investmentprojectcode',
-        'project_manager_first_assigned_by',
+        'project_manager__dit_team',
     ).annotate(
-        propositions=get_array_agg_subquery(
+        spi_propositions=get_array_agg_subquery(
             Proposition,
             'investment_project',
             JSONBBuildObject(
