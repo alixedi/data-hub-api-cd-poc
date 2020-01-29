@@ -124,6 +124,46 @@ class TestGetArrayAggSubquery:
             assert Counter(actual_author_names) == Counter(names)
 
     @pytest.mark.parametrize(
+        'names,desired_names', (
+            (
+                ['Barbara'], ['Barbara'],
+            ),
+            (
+                ['Barbara', 'Claire'], ['Claire'],
+            ),
+            (
+                ['Barbara', 'Claire', 'John', 'John'], ['Barbara', 'John'],
+            ),
+            (
+                ['Barbara', 'Barbara', 'Claire', 'John', 'John', 'John', 'Samantha'],
+                ['John', 'Samantha'],
+            ),
+        ),
+    )
+    def test_aggregates_as_filtered_array(self, names, desired_names):
+        """
+        Test that the desired first names of authors for each book can be aggregated into an array
+        for various cases.
+        """
+        authors = PersonFactory.create_batch(
+            len(names),
+            first_name=factory.Iterator(
+                sample(names, len(names)),
+            ),
+        )
+        BookFactory(authors=authors)
+        queryset = Book.objects.annotate(
+            author_names=get_array_agg_subquery(
+                Book.authors.through,
+                'book',
+                'person__first_name',
+                filter={'person__first_name__in': desired_names},
+            ),
+        )
+        actual_author_names = queryset.first()
+        assert set(actual_author_names.author_names) == set(desired_names)
+
+    @pytest.mark.parametrize(
         'ordering,expected_names',
         (
             ('person__first_name', ['Barbara', 'Claire', 'Samantha']),

@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.contrib.postgres.aggregates import ArrayAgg, StringAgg
 from django.contrib.postgres.fields import JSONField
-from django.db.models import Case, CharField, F, Func, OuterRef, Subquery, Value, When
+from django.db.models import Case, CharField, F, Func, OuterRef, Q, Subquery, Value, When
 from django.db.models.functions import Coalesce, Concat, NullIf
 
 
@@ -125,13 +125,17 @@ def get_array_agg_subquery(
     """
     return get_aggregate_subquery(
         model,
-        ArrayAgg(expression_to_aggregate, distinct=distinct, ordering=ordering),
-        filter=filter,
+        ArrayAgg(
+            expression_to_aggregate,
+            distinct=distinct,
+            ordering=ordering,
+            filter=Q(**filter) if filter else None,
+        ),
         join_field_name=join_field_name,
     )
 
 
-def get_aggregate_subquery(model, expression, join_field_name='pk', filter=None):
+def get_aggregate_subquery(model, expression, join_field_name='pk'):
     """
     Gets a subquery that calculates an aggregate value of a to-many field.
 
@@ -160,7 +164,7 @@ def get_aggregate_subquery(model, expression, join_field_name='pk', filter=None)
     ).values(
         '_annotated_value',
     )
-    return Subquery(queryset, filter=filter)
+    return Subquery(queryset)
 
 
 def get_top_related_expression_subquery(related_field, expression, ordering, outer_field='pk'):

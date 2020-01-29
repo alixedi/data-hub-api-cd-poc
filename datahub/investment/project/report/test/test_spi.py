@@ -5,16 +5,19 @@ from freezegun import freeze_time
 
 from datahub.company.test.factories import AdviserFactory, TeamFactory
 from datahub.core.constants import InvestmentProjectStage
-from datahub.core.constants import Service
+from datahub.core.constants import Service as ServiceConstant
+from datahub.core.test_utils import random_obj_for_queryset
 from datahub.interaction.test.factories import InvestmentProjectInteractionFactory
 from datahub.investment.project.constants import InvestorType
 from datahub.investment.project.proposition.models import PropositionDocument, PropositionStatus
 from datahub.investment.project.proposition.test.factories import PropositionFactory
+from datahub.investment.project.report.spi import ALL_SPI_SERVICE_IDS
 from datahub.investment.project.report.spi import SPIReport
 from datahub.investment.project.test.factories import (
     InvestmentProjectFactory,
     VerifyWinInvestmentProjectFactory,
 )
+from datahub.metadata.models import Service
 from datahub.metadata.models import Team
 
 pytestmark = pytest.mark.django_db
@@ -95,16 +98,16 @@ def test_can_see_spi1_start(spi_report):
 @pytest.mark.parametrize(
     'service_id,visible',
     (
-        (Service.investment_enquiry_requested_more_information.value.id, True),
-        (Service.investment_enquiry_confirmed_prospect.value.id, True),
-        (Service.investment_enquiry_assigned_to_ist_cmc.value.id, True),
-        (Service.investment_enquiry_assigned_to_ist_sas.value.id, True),
-        (Service.investment_enquiry_assigned_to_hq.value.id, True),
-        (Service.investment_enquiry_transferred_to_lep.value.id, True),
-        (Service.investment_enquiry_transferred_to_da.value.id, True),
-        (Service.investment_enquiry_transferred_to_lp.value.id, True),
-        (Service.inbound_referral.value.id, False),
-        (Service.account_management.value.id, False),
+        (ServiceConstant.investment_enquiry_requested_more_information.value.id, True),
+        (ServiceConstant.investment_enquiry_confirmed_prospect.value.id, True),
+        (ServiceConstant.investment_enquiry_assigned_to_ist_cmc.value.id, True),
+        (ServiceConstant.investment_enquiry_assigned_to_ist_sas.value.id, True),
+        (ServiceConstant.investment_enquiry_assigned_to_hq.value.id, True),
+        (ServiceConstant.investment_enquiry_transferred_to_lep.value.id, True),
+        (ServiceConstant.investment_enquiry_transferred_to_da.value.id, True),
+        (ServiceConstant.investment_enquiry_transferred_to_lp.value.id, True),
+        (ServiceConstant.inbound_referral.value.id, False),
+        (ServiceConstant.account_management.value.id, False),
     ),
 )
 def test_interaction_would_end_spi1_or_not(spi_report, service_id, visible):
@@ -132,16 +135,16 @@ def test_interaction_would_end_spi1_or_not(spi_report, service_id, visible):
 @pytest.mark.parametrize(
     'service_id,visible',
     (
-        (Service.investment_enquiry_requested_more_information.value.id, False),
-        (Service.investment_enquiry_confirmed_prospect.value.id, False),
-        (Service.investment_enquiry_assigned_to_ist_cmc.value.id, True),
-        (Service.investment_enquiry_assigned_to_ist_sas.value.id, True),
-        (Service.investment_enquiry_assigned_to_hq.value.id, False),
-        (Service.investment_enquiry_transferred_to_lep.value.id, False),
-        (Service.investment_enquiry_transferred_to_da.value.id, False),
-        (Service.investment_enquiry_transferred_to_lp.value.id, False),
-        (Service.inbound_referral.value.id, False),
-        (Service.account_management.value.id, False),
+        (ServiceConstant.investment_enquiry_requested_more_information.value.id, False),
+        (ServiceConstant.investment_enquiry_confirmed_prospect.value.id, False),
+        (ServiceConstant.investment_enquiry_assigned_to_ist_cmc.value.id, True),
+        (ServiceConstant.investment_enquiry_assigned_to_ist_sas.value.id, True),
+        (ServiceConstant.investment_enquiry_assigned_to_hq.value.id, False),
+        (ServiceConstant.investment_enquiry_transferred_to_lep.value.id, False),
+        (ServiceConstant.investment_enquiry_transferred_to_da.value.id, False),
+        (ServiceConstant.investment_enquiry_transferred_to_lp.value.id, False),
+        (ServiceConstant.inbound_referral.value.id, False),
+        (ServiceConstant.account_management.value.id, False),
     ),
 )
 def test_interaction_would_start_spi2_or_not(spi_report, ist_adviser, service_id, visible):
@@ -202,15 +205,15 @@ def test_earliest_interactions_are_being_selected(spi_report, ist_adviser):
     )
 
     service_dates = (
-        (Service.investment_enquiry_confirmed_prospect.value.id, '2016-01-02'),
-        (Service.investment_enquiry_confirmed_prospect.value.id, '2016-01-03'),
-        (Service.investment_enquiry_confirmed_prospect.value.id, '2016-01-01'),
-        (Service.investment_enquiry_assigned_to_ist_sas.value.id, '2017-01-03'),
-        (Service.investment_enquiry_assigned_to_ist_sas.value.id, '2017-01-01'),
-        (Service.investment_enquiry_assigned_to_ist_sas.value.id, '2017-01-02'),
-        (Service.investment_ist_aftercare_offered.value.id, '2017-03-04'),
-        (Service.investment_ist_aftercare_offered.value.id, '2017-03-05'),
-        (Service.investment_ist_aftercare_offered.value.id, '2017-03-06'),
+        (ServiceConstant.investment_enquiry_confirmed_prospect.value.id, '2016-01-02'),
+        (ServiceConstant.investment_enquiry_confirmed_prospect.value.id, '2016-01-03'),
+        (ServiceConstant.investment_enquiry_confirmed_prospect.value.id, '2016-01-01'),
+        (ServiceConstant.investment_enquiry_assigned_to_ist_sas.value.id, '2017-01-03'),
+        (ServiceConstant.investment_enquiry_assigned_to_ist_sas.value.id, '2017-01-01'),
+        (ServiceConstant.investment_enquiry_assigned_to_ist_sas.value.id, '2017-01-02'),
+        (ServiceConstant.investment_ist_aftercare_offered.value.id, '2017-03-04'),
+        (ServiceConstant.investment_ist_aftercare_offered.value.id, '2017-03-05'),
+        (ServiceConstant.investment_ist_aftercare_offered.value.id, '2017-03-06'),
     )
     for service_date in service_dates:
         with freeze_time(service_date[1]):
@@ -224,6 +227,50 @@ def test_earliest_interactions_are_being_selected(spi_report, ist_adviser):
     assert len(rows) == 1
     assert rows[0]['Enquiry processed'] == '2016-01-01T00:00:00+00:00'
     assert rows[0]['Assigned to IST'] == '2017-01-01T00:00:00+00:00'
+    assert rows[0]['Aftercare offered on'] == '2017-03-04T00:00:00+00:00'
+
+
+def test_only_ist_interactions_are_being_selected(spi_report, ist_adviser):
+    """Tests that report takes into account IST interactions only."""
+    investment_project = InvestmentProjectFactory(
+        project_manager=ist_adviser,
+    )
+
+    service_dates = (
+        (ServiceConstant.account_management.value.id, '2015-01-23'),
+        (
+            random_obj_for_queryset(Service.objects.exclude(pk__in=ALL_SPI_SERVICE_IDS)).id,
+            '2015-12-03',
+        ),
+        (ServiceConstant.investment_enquiry_confirmed_prospect.value.id, '2016-01-02'),
+        (
+            random_obj_for_queryset(Service.objects.exclude(pk__in=ALL_SPI_SERVICE_IDS)).id,
+            '2016-01-02',
+        ),
+        (
+            random_obj_for_queryset(Service.objects.exclude(pk__in=ALL_SPI_SERVICE_IDS)).id,
+            '2016-01-03',
+        ),
+        (ServiceConstant.investment_enquiry_confirmed_prospect.value.id, '2016-01-01'),
+        (
+            random_obj_for_queryset(Service.objects.exclude(pk__in=ALL_SPI_SERVICE_IDS)).id,
+            '2017-01-01',
+        ),
+        (ServiceConstant.investment_enquiry_assigned_to_ist_sas.value.id, '2017-01-03'),
+        (ServiceConstant.investment_ist_aftercare_offered.value.id, '2017-03-04'),
+    )
+    for service_date in service_dates:
+        with freeze_time(service_date[1]):
+            InvestmentProjectInteractionFactory(
+                investment_project=investment_project,
+                service_id=service_date[0],
+            )
+
+    rows = list(spi_report.rows())
+
+    assert len(rows) == 1
+    assert rows[0]['Enquiry processed'] == '2016-01-01T00:00:00+00:00'
+    assert rows[0]['Assigned to IST'] == '2017-01-03T00:00:00+00:00'
     assert rows[0]['Aftercare offered on'] == '2017-03-04T00:00:00+00:00'
 
 
@@ -293,7 +340,7 @@ def test_can_get_spi5_start_and_end(spi_report, ist_adviser):
 
     with freeze_time('2017-01-15'):
         InvestmentProjectInteractionFactory(
-            service_id=Service.investment_ist_aftercare_offered.value.id,
+            service_id=ServiceConstant.investment_ist_aftercare_offered.value.id,
             investment_project=investment_project,
         )
 
@@ -319,7 +366,7 @@ def test_cannot_get_spi5_start_and_end_for_non_new_investor(
 
     with freeze_time('2017-01-15'):
         InvestmentProjectInteractionFactory(
-            service_id=Service.investment_ist_aftercare_offered.value.id,
+            service_id=ServiceConstant.investment_ist_aftercare_offered.value.id,
             investment_project=investment_project,
         )
 

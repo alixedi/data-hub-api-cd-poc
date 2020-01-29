@@ -49,6 +49,8 @@ SPI5_END_SERVICE_IDS = {
     Service.investment_ist_aftercare_offered.value.id,
 }
 
+ALL_SPI_SERVICE_IDS = SPI1_END_SERVICE_IDS | SPI2_START_SERVICE_IDS | SPI5_END_SERVICE_IDS
+
 
 def format_date(d):
     """Date format used in the report."""
@@ -274,8 +276,6 @@ class SPIReport:
 
 def get_spi_report_queryset():
     """Get SPI Report queryset."""
-    all_spi_service_ids = (SPI1_END_SERVICE_IDS | SPI2_START_SERVICE_IDS | SPI5_END_SERVICE_IDS)
-
     return InvestmentProject.objects.select_related(
         'investmentprojectcode',
         'project_manager__dit_team',
@@ -303,7 +303,7 @@ def get_spi_report_queryset():
                 created_on='created_on',
             ),
             filter={
-                'service_id__in': all_spi_service_ids,
+                'service_id__in': ALL_SPI_SERVICE_IDS,
             },
             ordering=('created_on',),
         ),
