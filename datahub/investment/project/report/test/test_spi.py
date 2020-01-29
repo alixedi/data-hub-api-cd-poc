@@ -4,11 +4,11 @@ from django.utils.timezone import now
 from freezegun import freeze_time
 
 from datahub.company.test.factories import AdviserFactory, TeamFactory
-from datahub.core.constants import InvestmentProjectStage
+from datahub.core.constants import InvestmentProjectStage as InvestmentProjectStageConstant
 from datahub.core.constants import Service as ServiceConstant
 from datahub.core.test_utils import random_obj_for_queryset
 from datahub.interaction.test.factories import InvestmentProjectInteractionFactory
-from datahub.investment.project.constants import InvestorType
+from datahub.investment.project.constants import InvestorType as InvestorTypeConstant
 from datahub.investment.project.proposition.models import PropositionDocument, PropositionStatus
 from datahub.investment.project.proposition.test.factories import PropositionFactory
 from datahub.investment.project.report.spi import ALL_SPI_SERVICE_IDS
@@ -335,7 +335,7 @@ def test_can_get_spi5_start_and_end(spi_report, ist_adviser):
     )
 
     with freeze_time('2017-01-01'):
-        investment_project.stage_id = InvestmentProjectStage.won.value.id
+        investment_project.stage_id = InvestmentProjectStageConstant.won.value.id
         investment_project.save()
 
     with freeze_time('2017-01-15'):
@@ -357,11 +357,11 @@ def test_cannot_get_spi5_start_and_end_for_non_new_investor(
     """Tests if we are not going to see spi5 start and end dates if investor is not new."""
     investment_project = VerifyWinInvestmentProjectFactory(
         project_manager=ist_adviser,
-        investor_type_id=InvestorType.existing_investor.value.id,
+        investor_type_id=InvestorTypeConstant.existing_investor.value.id,
     )
 
     with freeze_time('2017-01-01'):
-        investment_project.stage_id = InvestmentProjectStage.won.value.id
+        investment_project.stage_id = InvestmentProjectStageConstant.won.value.id
         investment_project.save()
 
     with freeze_time('2017-01-15'):
