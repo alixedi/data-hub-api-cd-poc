@@ -524,6 +524,27 @@ class TestGetCompany(APITestMixin):
             } for item in company.export_countries.order_by('pk')
         ]
 
+    def test_check_company_dont_return_export_countries_with_no_permission(self):
+        """
+        Tests the company response has no export countries
+        without appropriate permission.
+        """
+        company = CompanyFactory()
+        export_country_one, export_country_two = CompanyExportCountryFactory.create_batch(2)
+        company.export_countries.set([export_country_one, export_country_two])
+        user = create_test_user(
+            permission_codenames=(
+                'view_company',
+            ),
+        )
+        api_client = self.create_api_client(user=user)
+
+        url = reverse('api-v4:company:item', kwargs={'pk': company.id})
+        response = api_client.get(url)
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json().get('export_countries', None) is None
+
     @pytest.mark.parametrize(
         'build_company',
         (
