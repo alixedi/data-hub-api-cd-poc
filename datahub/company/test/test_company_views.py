@@ -261,6 +261,7 @@ class TestGetCompany(APITestMixin):
             permission_codenames=(
                 'view_company',
                 'view_company_document',
+                'view_companyexportcountry',
             ),
         )
         api_client = self.create_api_client(user=user)
@@ -502,7 +503,7 @@ class TestGetCompany(APITestMixin):
         user = create_test_user(
             permission_codenames=(
                 'view_company',
-                'view_company_document',
+                'view_companyexportcountry',
             ),
         )
         api_client = self.create_api_client(user=user)
@@ -1394,7 +1395,7 @@ class TestCompaniesToCompanyExportCountryModel(APITestMixin):
         user = create_test_user(
             permission_codenames=(
                 'view_company',
-                'view_company_document',
+                'view_companyexportcountry',
             ),
         )
         api_client = self.create_api_client(user=user)
@@ -1736,6 +1737,7 @@ class TestCompaniesToCompanyExportCountryModel(APITestMixin):
         (
             (),
             (CompanyPermission.change_company,),
+            ('change_companyexportcountry',),
         ),
     )
     def test_returns_403_if_without_permission(self, permission_codenames):
