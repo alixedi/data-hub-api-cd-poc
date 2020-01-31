@@ -13,6 +13,7 @@ SPI5_END    - earliest interaction when aftercare was offered, only for new inve
               only for IST managed projects
 """
 from dateutil.parser import parse as dateutil_parse
+from django.db.models import Q
 
 from datahub.core.constants import InvestmentProjectStage as Stage, Service
 from datahub.core.csv import csv_iterator
@@ -302,9 +303,7 @@ def get_spi_report_queryset():
                 created_by_name=get_full_name_expression('created_by'),
                 created_on='created_on',
             ),
-            filter={
-                'service_id__in': ALL_SPI_SERVICE_IDS,
-            },
+            filter=Q(service_id__in=ALL_SPI_SERVICE_IDS),
             ordering=('created_on',),
         ),
     ).order_by('created_on')
